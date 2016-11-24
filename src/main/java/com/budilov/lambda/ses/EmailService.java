@@ -6,18 +6,15 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.simpleemail.AmazonSimpleEmailServiceClient;
 import com.amazonaws.services.simpleemail.model.*;
 
-/**
- * Created by Vladimir Budilov on 10/25/15.
- */
-public class EmailService {
+class EmailService {
 
-    private static String TO = PropUtil.get("toEmail"); // Replace with a "To" address. If your account is still in the
+    private static final String FROM = PropUtil.get("fromEmail");
+    private static final String TO = PropUtil.get("toEmail"); // Replace with a "To" address. If your account is still in the
+    private static final BasicAWSCredentials AWS_CREDENTIALS = new BasicAWSCredentials(PropUtil.get("accessKey"), PropUtil.get("secretKey"));
 
-    private static BasicAWSCredentials awsCreds = new BasicAWSCredentials(PropUtil.get("accessKey"), PropUtil.get("secretKey"));
+    static void sendEmail(Email email) throws Exception {
 
-    public static void sendEmail(Email email) throws Exception {
-
-        Destination destination = new Destination().withToAddresses(new String[]{TO});
+        Destination destination = new Destination().withToAddresses(TO);
 
         Content subject = new Content().withData(email.getSubject() + " (from " + email.getFrom() + ")");
         Content textBody = new Content().withData(email.getMessage());
@@ -25,14 +22,14 @@ public class EmailService {
 
         Message message = new Message().withSubject(subject).withBody(body);
 
-        SendEmailRequest request = new SendEmailRequest().withSource(PropUtil.get("fromEmail"))
+        SendEmailRequest request = new SendEmailRequest().withSource(FROM)
                 .withDestination(destination)
                 .withMessage(message);
 
         try {
             System.out.println("Attempting to send an email through Amazon SES by using the AWS SDK for Java...");
-            AmazonSimpleEmailServiceClient client = new AmazonSimpleEmailServiceClient(awsCreds);
-            Region REGION = Region.getRegion(Regions.US_EAST_1);
+            AmazonSimpleEmailServiceClient client = new AmazonSimpleEmailServiceClient(AWS_CREDENTIALS);
+            Region REGION = Region.getRegion(Regions.EU_WEST_1);
             client.setRegion(REGION);
 
             client.sendEmail(request);
