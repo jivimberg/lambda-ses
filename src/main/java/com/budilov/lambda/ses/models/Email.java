@@ -1,4 +1,4 @@
-package com.budilov.lambda.ses;
+package com.budilov.lambda.ses.models;
 
 public class Email {
     String from;

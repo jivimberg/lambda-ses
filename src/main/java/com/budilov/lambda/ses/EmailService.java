@@ -9,6 +9,7 @@ import com.amazonaws.services.simpleemail.model.Content;
 import com.amazonaws.services.simpleemail.model.Destination;
 import com.amazonaws.services.simpleemail.model.Message;
 import com.amazonaws.services.simpleemail.model.SendEmailRequest;
+import com.budilov.lambda.ses.models.Email;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
