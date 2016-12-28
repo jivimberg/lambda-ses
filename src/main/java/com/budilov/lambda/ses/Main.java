@@ -43,21 +43,13 @@ public class Main {
             logger.log(jsonString);
             SESEvent event = mapper.readValue(jsonString, SESEvent.class);
             SESEvent.SESMail mailObject = event.getRecords().get(0).getSES().getMail();
-            String from = mailObject.getCommonHeaders().getFrom().get(0);
+            String from = mailObject.getSource();
             logger.log("From: "+ from);
             String messageId  = mailObject.getMessageId();
             logger.log("MessageId: "+ messageId);
 
-            //read from S3
-            String messageContent = FormService.readFromS3(messageId);
-
-            //get HTML
-            String html = FormService.getHTML(messageContent);
-
-            //persist to S3
-
-            //remove full message
-
+            FormService formService = new FormService(logger);
+            formService.processEmail(from, messageId);
         } catch (IOException e) {
             response = "{ \"success\": \"false\"}";
             e.printStackTrace();
