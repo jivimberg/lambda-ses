@@ -8,6 +8,8 @@ import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.util.IOUtils;
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.net.QuotedPrintableCodec;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -35,20 +37,25 @@ class FormService {
     }
 
     void processEmail(@NotNull String from, @NotNull String messageId)
-            throws IOException
-    {
+            throws IOException, DecoderException {
         logger.log("Processing email with message Id: " + messageId + " from: " + from);
         String messageContent = readFromS3(s3Client, messageId);
         String html = getHTML(messageContent);
-        persistHTML(s3Client, from, messageId, html);
+        String decodedHtml = decodeHTML(html);
+        persistHTML(s3Client, from, messageId, decodedHtml);
         removeS3(s3Client, messageId);
     }
 
+    String decodeHTML(@NotNull String html) throws DecoderException {
+        String htmlWithoutLineBreaks = html.replaceAll("=[\n\r]", "");
+        return new QuotedPrintableCodec().decode(htmlWithoutLineBreaks);
+    }
+
     @NotNull
-    private String readFromS3(@NotNull AmazonS3 s3Client, @NotNull String messageId) throws IOException {
-        logger.log("Reading from S3 messageId: " + messageId);
+    String readFromS3(@NotNull AmazonS3 s3Client, @NotNull String key) throws IOException {
+        logger.log("Reading from S3 key: " + key);
         S3Object object = s3Client.getObject(
-                new GetObjectRequest(BUCKET_NAME, messageId));
+                new GetObjectRequest(BUCKET_NAME, key));
         try(InputStream objectData = object.getObjectContent()){
             return IOUtils.toString(objectData);
         }
@@ -58,7 +65,7 @@ class FormService {
     String getHTML(@NotNull String messageContent) {
         logger.log("Getting HTML from content: " + messageContent);
         //Matching both beginning and end tags
-        String[] parts = messageContent.split("\\<\\/?html\\>", 3);
+        String[] parts = messageContent.split("<\\/?html\\>", 3);
         String actual = parts[1];
         return "<html>" + actual + "</html>";
     }

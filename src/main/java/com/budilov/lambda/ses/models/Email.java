@@ -1,9 +1,9 @@
 package com.budilov.lambda.ses.models;
 
 public class Email {
-    String from;
-    String subject;
-    String message;
+    private String from;
+    private String subject;
+    private String messageKey;
 
     public String getFrom() {
         return from;
@@ -21,12 +21,12 @@ public class Email {
         this.subject = subject;
     }
 
-    public String getMessage() {
-        return message;
+    public String getMessageKey() {
+        return messageKey;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
+    public void setMessageKey(String message) {
+        this.messageKey = message;
     }
 
     @Override
@@ -34,7 +34,7 @@ public class Email {
         return "Email{" +
                 "from='" + from + '\'' +
                 ", subject='" + subject + '\'' +
-                ", message='" + message + '\'' +
+                ", messageKey='" + messageKey + '\'' +
                 '}';
     }
 }

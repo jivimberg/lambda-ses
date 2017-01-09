@@ -416,6 +416,8 @@ public class SESEvent implements Serializable {
 
         private List<String> to;
 
+        private List<String> replyTo;
+
         private String messageId;
 
         private String subject;
@@ -466,6 +468,14 @@ public class SESEvent implements Serializable {
 
         public void setSubject(String subject) {
             this.subject = subject;
+        }
+
+        public List<String> getReplyTo() {
+            return replyTo;
+        }
+
+        public void setReplyTo(List<String> replyTo) {
+            this.replyTo = replyTo;
         }
     }
 

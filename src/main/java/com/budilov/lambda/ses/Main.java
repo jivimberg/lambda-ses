@@ -7,6 +7,7 @@ import com.amazonaws.util.IOUtils;
 import com.budilov.lambda.ses.models.Email;
 import com.budilov.lambda.ses.models.SESEvent;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.codec.DecoderException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,8 +22,9 @@ public class Main {
         LambdaLogger logger = context.getLogger();
         logger.log("received : " + email);
         String response = "{ \"success\": \"true\"}";
+        EmailService service = new EmailService(logger);
         try {
-            EmailService.sendEmail(email);
+            service.sendEmail(email);
         } catch (Exception exc) {
             response = "{ \"success\": \"false\"}";
         }
@@ -43,14 +45,14 @@ public class Main {
             logger.log(jsonString);
             SESEvent event = mapper.readValue(jsonString, SESEvent.class);
             SESEvent.SESMail mailObject = event.getRecords().get(0).getSES().getMail();
-            String from = mailObject.getSource();
+            String from = mailObject.getCommonHeaders().getFrom().iterator().next();
             logger.log("From: "+ from);
             String messageId  = mailObject.getMessageId();
             logger.log("MessageId: "+ messageId);
 
             FormService formService = new FormService(logger);
             formService.processEmail(from, messageId);
-        } catch (IOException e) {
+        } catch (IOException | DecoderException e) {
             response = "{ \"success\": \"false\"}";
             e.printStackTrace();
         }
